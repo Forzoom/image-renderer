@@ -1,0 +1,38 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "strict": true,
+        "jsx": "preserve",
+        "importHelpers": true,
+        "moduleResolution": "node", // 用npm模式加载
+        "experimentalDecorators": true, // 开启修饰器模式
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true, // 兼容没有export的库
+        "sourceMap": true,
+        "baseUrl": ".",
+        "allowJs": true,
+        "types": [],
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        },
+        "lib": [ // 识别基本类型库
+            "esnext",
+            "dom",
+            "dom.iterable",
+            "scripthost"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
+  
+  
