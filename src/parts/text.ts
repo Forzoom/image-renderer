@@ -1,8 +1,7 @@
-import { Part } from './part';
-import { TextPartOptions } from '../type';
-import { isString, isUndef, loadImage } from '@/lib/utils';
+import { BasePart } from './part';
+import { TextPartOptions } from '../../types';
+import { isString, isUndef, binarySearch } from '../utils';
 import { Point } from '../struct';
-import { binarySearch } from '../utils';
 
 export const defaultOptions: TextPartOptions = {
     origin: new Point(0, 0),
@@ -13,7 +12,7 @@ export const defaultOptions: TextPartOptions = {
     orientation: 'horizontal',
 };
 
-export class TextPart extends Part implements TextPartOptions {
+export class TextPart extends BasePart implements TextPartOptions {
     public readonly type = 'text';
     public value?: string | string[];
     public origin: Point;

@@ -7,7 +7,7 @@ export class Size {
         this.height = height;
     }
 
-    public scale(fit: Size) {
+    public scale(fit: Size): Size {
         const ratio = this.width / this.height;
         const fitRatio = fit.width / fit.height;
     

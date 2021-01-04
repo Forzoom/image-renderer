@@ -1,6 +1,6 @@
-import { Part } from './part';
-import { LinearGradientPartOptions } from '../type';
-import { Point, Size } from '../struct';
+import { BasePart } from './part';
+import { LinearGradientPartOptions } from '../../types';
+import { Point } from '../struct';
 
 export const defaultOptions: LinearGradientPartOptions = {
     stop: [],
@@ -9,7 +9,7 @@ export const defaultOptions: LinearGradientPartOptions = {
     rect: { x: 0, y: 0, width: 0, height: 0 },
 };
 
-export class LinearGradientPart extends Part implements LinearGradientPartOptions {
+export class LinearGradientPart extends BasePart implements LinearGradientPartOptions {
     public readonly type = 'linearGradient';
     public stop: Array<{ pos: number; color: string }>;
     public start: { x: number; y: number };

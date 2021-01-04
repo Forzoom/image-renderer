@@ -1,6 +1,6 @@
-import { Part } from './part';
-import { ImagePartOptions } from '../type';
-import { isString, isUndef, loadImage } from '@/lib/utils';
+import { BasePart } from './part';
+import { ImagePartOptions } from '../../types';
+import { isString, isUndef, loadImage } from '../utils';
 import { Point, Size } from '../struct';
 
 export const defaultOptions: ImagePartOptions = {
@@ -9,7 +9,7 @@ export const defaultOptions: ImagePartOptions = {
     size: new Size(0, 0),
 };
 
-export class ImagePart extends Part implements ImagePartOptions {
+export class ImagePart extends BasePart implements ImagePartOptions {
     public readonly type = 'image';
     public value?: string | HTMLImageElement | HTMLCanvasElement | null;
     public origin: Point;

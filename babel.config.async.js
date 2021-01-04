@@ -3,10 +3,10 @@ module.exports = {
         [ "@babel/preset-env", {
             useBuiltIns: 'usage',
             corejs: 3,
-            // exclude: [
-            //     '@babel/plugin-transform-async-to-generator',
-            //     '@babel/plugin-transform-regenerator'
-            // ],
+            exclude: [
+                '@babel/plugin-transform-async-to-generator',
+                '@babel/plugin-transform-regenerator'
+            ],
         } ],
         "@babel/preset-typescript"
     ],

@@ -1,6 +1,5 @@
-import { Part } from './part';
-import { RectPartOptions } from '../type';
-import { isString, isUndef, loadImage } from '@/lib/utils';
+import { BasePart } from './part';
+import { RectPartOptions } from '../../types';
 import { Point, Size } from '../struct';
 
 export const defaultOptions: RectPartOptions = {
@@ -9,7 +8,7 @@ export const defaultOptions: RectPartOptions = {
     size: new Size(0, 0),
 };
 
-export class RectPart extends Part implements RectPartOptions {
+export class RectPart extends BasePart implements RectPartOptions {
     public readonly type = 'rect';
     public backgroundColor: string;
     public origin: Point;
