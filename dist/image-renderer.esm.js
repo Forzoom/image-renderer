@@ -876,6 +876,8 @@ var defaultOptions = {
 var BasePart = function BasePart(options) {
   _classCallCheck(this, BasePart);
 
+  _defineProperty(this, "key", void 0);
+
   _defineProperty(this, "alpha", void 0);
 
   _defineProperty(this, "filter", void 0);
@@ -883,6 +885,7 @@ var BasePart = function BasePart(options) {
   var opt = Object.assign({}, defaultOptions, options);
   this.alpha = opt.alpha;
   this.filter = opt.filter;
+  this.key = opt.key;
 };
 
 var Size = /*#__PURE__*/function () {
@@ -900,36 +903,85 @@ var Size = /*#__PURE__*/function () {
   }
 
   _createClass(Size, [{
-    key: "scale",
-    value: function scale(fit) {
+    key: "scaleMode",
+    value: function scaleMode(mode, fit) {
       var ratio = this.width / this.height;
       var fitRatio = fit.width / fit.height;
-      var result = new Size(0, 0); // 图片更宽
+      var result = new Size(0, 0);
 
-      if (ratio > fitRatio) {
-        result.height = fit.height;
-        result.width = fit.height * ratio;
+      if (mode === 'fill') {
+        // 图片更宽
+        if (ratio > fitRatio) {
+          result.height = fit.height;
+          result.width = fit.height * ratio;
+        } else {
+          result.width = fit.width;
+          result.height = fit.width / ratio;
+        }
       } else {
-        result.width = fit.width;
-        result.height = fit.width / ratio;
+        // 图片更宽
+        if (ratio > fitRatio) {
+          result.width = fit.width;
+          result.height = fit.width / ratio;
+        } else {
+          result.height = fit.height;
+          result.width = fit.height * ratio;
+        }
       }
 
       return result;
+    }
+  }, {
+    key: "scale",
+    value: function scale(ratio) {
+      return new Size(this.width * ratio, this.height * ratio);
     }
   }]);
 
   return Size;
 }();
-var Point = function Point(x, y) {
-  _classCallCheck(this, Point);
+var Point = /*#__PURE__*/function () {
+  function Point(x, y) {
+    _classCallCheck(this, Point);
 
-  _defineProperty(this, "x", void 0);
+    _defineProperty(this, "x", void 0);
 
-  _defineProperty(this, "y", void 0);
+    _defineProperty(this, "y", void 0);
 
-  this.x = x;
-  this.y = y;
-};
+    this.x = x;
+    this.y = y;
+  }
+
+  _createClass(Point, [{
+    key: "scale",
+    value: function scale(ratio) {
+      return new Point(this.x * ratio, this.y * ratio);
+    }
+  }]);
+
+  return Point;
+}();
+var Rect = /*#__PURE__*/function () {
+  function Rect(origin, size) {
+    _classCallCheck(this, Rect);
+
+    _defineProperty(this, "origin", void 0);
+
+    _defineProperty(this, "size", void 0);
+
+    this.origin = origin;
+    this.size = size;
+  }
+
+  _createClass(Rect, [{
+    key: "scale",
+    value: function scale(ratio) {
+      return new Rect(this.origin.scale(ratio), this.size.scale(ratio));
+    }
+  }]);
+
+  return Rect;
+}();
 
 function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
 
@@ -950,6 +1002,8 @@ var TextPart = /*#__PURE__*/function (_BasePart) {
   /** 将自动折行 */
 
   /** 需要手动指定行高 */
+
+  /** 为vertical时将主动value.split('') */
   function TextPart(options) {
     var _this;
 
@@ -1097,7 +1151,8 @@ function _isNativeReflectConstruct$1() { if (typeof Reflect === "undefined" || !
 var defaultOptions$2 = {
   value: '',
   origin: new Point(0, 0),
-  size: new Size(0, 0)
+  size: new Size(0, 0),
+  clip: undefined
 };
 var ImagePart = /*#__PURE__*/function (_BasePart) {
   _inherits(ImagePart, _BasePart);
@@ -1119,10 +1174,13 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
 
     _defineProperty(_assertThisInitialized(_this), "size", void 0);
 
+    _defineProperty(_assertThisInitialized(_this), "clip", void 0);
+
     var opt = Object.assign({}, defaultOptions$2, options);
     _this.value = opt.value;
     _this.origin = opt.origin;
     _this.size = opt.size;
+    _this.clip = opt.clip;
     return _this;
   }
   /**
@@ -1134,7 +1192,7 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
     key: "drawCanvas",
     value: function () {
       var _drawCanvas = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(ctx) {
-        var elm;
+        var elm, origin, size, clip;
         return _regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -1166,9 +1224,17 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
                 elm = this.value;
 
               case 10:
-                ctx.drawImage(elm, this.origin.x, this.origin.y, this.size.width, this.size.height);
+                origin = this.origin;
+                size = this.size;
+                clip = this.clip;
 
-              case 11:
+                if (!clip) {
+                  ctx.drawImage(elm, origin.x, origin.y, size.width, size.height);
+                } else {
+                  ctx.drawImage(elm, clip.origin.x, clip.origin.y, clip.size.width, clip.size.height, origin.x, origin.y, size.width, size.height);
+                }
+
+              case 14:
               case "end":
                 return _context.stop();
             }
@@ -1616,4 +1682,4 @@ var Renderer = /*#__PURE__*/function () {
   return Renderer;
 }();
 
-export { BasePart, ImagePart, LinearGradientPart, Point, RectPart, Renderer, Size, TextPart, drawParts };
+export { BasePart, ImagePart, LinearGradientPart, Point, Rect, RectPart, Renderer, Size, TextPart, drawParts };

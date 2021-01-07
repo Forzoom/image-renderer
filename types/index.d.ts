@@ -5,6 +5,7 @@ export class Point {
     constructor(x: number, y: number);
     x: number;
     y: number;
+    scale(ratio: number): Point;
 }
 
 /**
@@ -14,10 +15,22 @@ export class Size {
     constructor(width: number, height?: number);
     width: number;
     height: number;
-    scale(fit: Size): Size;
+    scaleMode(mode: 'fill' | 'fit', fit: Size): Size;
+    scale(ratio: number): Size;
+}
+
+/**
+ * 点信息
+ */
+export class Rect {
+    constructor(origin: Point, size: Size);
+    origin: Point;
+    size: Size;
+    scale(ratio: number): Rect;
 }
 
 export interface BasePartOption {
+    key?: string;
     alpha?: number;
     filter?: boolean;
 }
@@ -25,7 +38,7 @@ export class BasePart implements BasePartOption {
     type: string;
     alpha?: number;
     filter?: boolean;
-    drawCanvas(ctx: CanvasRenderingContext2D): void;
+    drawCanvas(ctx: CanvasRenderingContext2D): Promise<void> | void;
 }
 
 export type Part = ImagePart | TextPart;
@@ -103,14 +116,19 @@ export class RectPart extends BasePart implements RectPartOptions {
 
 export interface ImagePartOptions extends BasePartOption {
     value?: string | HTMLImageElement | HTMLCanvasElement | null;
+    /** 绘制原点 */
     origin: Point;
+    /** 绘制大小 */
     size: Size;
+    /** 裁切 */
+    clip?: Rect;
 }
 export class ImagePart extends BasePart implements ImagePartOptions {
     type: 'image';
     value?: string | HTMLImageElement | HTMLCanvasElement | null;
     origin: Point;
     size: Size;
+    clip?: Rect;
     constructor(options?: Partial<ImagePartOptions>);
 }
 

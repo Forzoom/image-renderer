@@ -6,7 +6,7 @@ export { TextPart } from './parts/text';
 export { ImagePart } from './parts/image';
 export { RectPart } from './parts/rect';
 export { LinearGradientPart } from './parts/linearGradient';
-export { Size, Point } from './struct';
+export { Size, Point, Rect } from './struct';
 
 export {
     BasePart,

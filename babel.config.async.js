@@ -5,7 +5,7 @@ module.exports = {
             corejs: 3,
             exclude: [
                 '@babel/plugin-transform-async-to-generator',
-                '@babel/plugin-transform-regenerator'
+                '@babel/plugin-transform-regenerator',
             ],
         } ],
         "@babel/preset-typescript"

@@ -1,12 +1,13 @@
 import { BasePart } from './part';
 import { ImagePartOptions } from '../../types';
 import { isString, isUndef, loadImage } from '../utils';
-import { Point, Size } from '../struct';
+import { Point, Size, Rect } from '../struct';
 
 export const defaultOptions: ImagePartOptions = {
     value: '',
     origin: new Point(0, 0),
     size: new Size(0, 0),
+    clip: undefined,
 };
 
 export class ImagePart extends BasePart implements ImagePartOptions {
@@ -14,6 +15,7 @@ export class ImagePart extends BasePart implements ImagePartOptions {
     public value?: string | HTMLImageElement | HTMLCanvasElement | null;
     public origin: Point;
     public size: Size;
+    public clip?: Rect;
 
     public constructor(options?: Partial<ImagePartOptions>) {
         super(options || {});
@@ -21,6 +23,7 @@ export class ImagePart extends BasePart implements ImagePartOptions {
         this.value = opt.value;
         this.origin = opt.origin;
         this.size = opt.size;
+        this.clip = opt.clip;
     }
 
     /**
@@ -36,7 +39,14 @@ export class ImagePart extends BasePart implements ImagePartOptions {
         } else {
             elm = this.value;
         }
-        ctx.drawImage(elm, this.origin.x, this.origin.y, this.size.width, this.size.height);
+        const origin = this.origin;
+        const size = this.size;
+        const clip = this.clip;
+        if (!clip) {
+            ctx.drawImage(elm, origin.x, origin.y, size.width, size.height);
+        } else {
+            ctx.drawImage(elm, clip.origin.x, clip.origin.y, clip.size.width, clip.size.height, origin.x, origin.y, size.width, size.height);
+        }
     }
 
     public circleClip(ctx: CanvasRenderingContext2D) {

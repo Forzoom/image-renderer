@@ -6,6 +6,7 @@ export const defaultOptions: BasePartOption = {
 } as const;
 
 export abstract class BasePart {
+    public key?: string;
     public alpha?: number;
     public filter?: boolean;
 
@@ -13,6 +14,7 @@ export abstract class BasePart {
         const opt = Object.assign({}, defaultOptions, options);
         this.alpha = opt.alpha;
         this.filter = opt.filter;
+        this.key = opt.key;
     }
 
     public abstract drawCanvas(ctx: CanvasRenderingContext2D): Promise<void> | void;

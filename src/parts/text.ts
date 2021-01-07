@@ -25,6 +25,7 @@ export class TextPart extends BasePart implements TextPartOptions {
     public color?: string;
     public font?: string;
     public textAlign: 'left' | 'center' | 'right';
+    /** 为vertical时将主动value.split('') */
     public orientation?: 'horizontal' | 'vertical';
 
     public constructor(options?: Partial<TextPartOptions>) {
