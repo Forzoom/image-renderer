@@ -20,11 +20,12 @@ import 'core-js/modules/es.string.iterator.js';
 import 'core-js/modules/web.dom-collections.for-each.js';
 import 'core-js/modules/web.dom-collections.iterator.js';
 import _typeof from '@babel/runtime/helpers/typeof';
+import _asyncToGenerator from '@babel/runtime/helpers/asyncToGenerator';
 import _classCallCheck from '@babel/runtime/helpers/classCallCheck';
 import _createClass from '@babel/runtime/helpers/createClass';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
-import _asyncToGenerator from '@babel/runtime/helpers/asyncToGenerator';
 import 'core-js/modules/es.object.assign.js';
+import 'core-js/modules/es.array.concat.js';
 import 'core-js/modules/es.regexp.exec.js';
 import 'core-js/modules/es.string.split.js';
 import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
@@ -873,8 +874,12 @@ var defaultOptions = {
   filter: undefined,
   alpha: 1
 };
-var BasePart = function BasePart(options) {
+var BasePart =
+/** 渲染器，在渲染前将配置 */
+function BasePart(options) {
   _classCallCheck(this, BasePart);
+
+  _defineProperty(this, "renderer", null);
 
   _defineProperty(this, "key", void 0);
 
@@ -989,6 +994,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 var defaultOptions$1 = {
   origin: new Point(0, 0),
   fontSize: 14,
+  font: 'sans-serif',
   singleLine: false,
   color: '000000',
   textAlign: 'left',
@@ -1001,7 +1007,11 @@ var TextPart = /*#__PURE__*/function (_BasePart) {
 
   /** 将自动折行 */
 
+  /** 字体大小 */
+
   /** 需要手动指定行高 */
+
+  /** 使用字体 */
 
   /** 为vertical时将主动value.split('') */
   function TextPart(options) {
@@ -1075,8 +1085,9 @@ var TextPart = /*#__PURE__*/function (_BasePart) {
               case 2:
                 ctx.fillStyle = '#' + this.color;
 
-                if (this.font) {
-                  ctx.font = this.font;
+                if (this.fontSize && this.font) {
+                  // tip: 根据文档，ctx.font要求fontFamily和fontSize一起设置，并且一定要有两者
+                  ctx.font = "".concat(this.fontSize, "px ").concat(this.font);
                 }
 
                 ctx.textAlign = this.textAlign; // 对于宽度有限制要求
@@ -1205,25 +1216,41 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
                 return _context.abrupt("return");
 
               case 2:
-                elm = null;
-
-                if (!isString(this.value)) {
-                  _context.next = 9;
+                if (this.renderer) {
+                  _context.next = 4;
                   break;
                 }
 
-                _context.next = 6;
-                return loadImage(this.value, true);
+                throw new Error('Cannot find renderer.');
+
+              case 4:
+                if (this.renderer.options) {
+                  _context.next = 6;
+                  break;
+                }
+
+                throw new Error('Cannot find renderer.options, use renderer.generate function first.');
 
               case 6:
-                elm = _context.sent;
-                _context.next = 10;
-                break;
+                elm = null;
 
-              case 9:
-                elm = this.value;
+                if (!isString(this.value)) {
+                  _context.next = 13;
+                  break;
+                }
+
+                _context.next = 10;
+                return loadImage(this.value, true);
 
               case 10:
+                elm = _context.sent;
+                _context.next = 14;
+                break;
+
+              case 13:
+                elm = this.value;
+
+              case 14:
                 origin = this.origin;
                 size = this.size;
                 clip = this.clip;
@@ -1234,7 +1261,7 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
                   ctx.drawImage(elm, clip.origin.x, clip.origin.y, clip.size.width, clip.size.height, origin.x, origin.y, size.width, size.height);
                 }
 
-              case 14:
+              case 18:
               case "end":
                 return _context.stop();
             }
@@ -1436,67 +1463,13 @@ function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Sy
 function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
 
 function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-/**
- * 渲染图片
- */
-
-function drawParts(_x, _x2) {
-  return _drawParts.apply(this, arguments);
-}
-
-function _drawParts() {
-  _drawParts = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee4(ctx, parts) {
-    var i, len, part;
-    return _regeneratorRuntime.wrap(function _callee4$(_context4) {
-      while (1) {
-        switch (_context4.prev = _context4.next) {
-          case 0:
-            i = 0, len = parts.length;
-
-          case 1:
-            if (!(i < len)) {
-              _context4.next = 12;
-              break;
-            }
-
-            part = parts[i];
-            ctx.save();
-
-            if (!isUndef(part.alpha)) {
-              ctx.globalAlpha = part.alpha;
-            }
-
-            if (part.filter) {
-              // image.style.filter = 'blur(20px)';
-              ctx.filter = 'blur(20px)';
-            }
-
-            _context4.next = 8;
-            return part.drawCanvas(ctx);
-
-          case 8:
-            ctx.restore();
-
-          case 9:
-            i++;
-            _context4.next = 1;
-            break;
-
-          case 12:
-          case "end":
-            return _context4.stop();
-        }
-      }
-    }, _callee4);
-  }));
-  return _drawParts.apply(this, arguments);
-}
-
 var Renderer = /*#__PURE__*/function () {
   function Renderer() {
     _classCallCheck(this, Renderer);
 
     _defineProperty(this, "parts", []);
+
+    _defineProperty(this, "options", null);
   }
 
   _createClass(Renderer, [{
@@ -1523,16 +1496,16 @@ var Renderer = /*#__PURE__*/function () {
     key: "generate",
     value: function () {
       var _generate = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime.mark(function _callee(options) {
-        var canvasElm, ctx, _iterator, _step, part;
+        var canvasElm, ctx, _iterator, _step, part, parts, i, len, _part;
 
         return _regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                options = this.getOptions(options);
-                canvasElm = options.createCanvas();
-                canvasElm.width = options.width;
-                canvasElm.height = options.height;
+                this.options = this.getOptions(options);
+                canvasElm = this.options.createCanvas();
+                canvasElm.width = this.options.width;
+                canvasElm.height = this.options.height;
                 ctx = canvasElm.getContext('2d');
 
                 if (ctx) {
@@ -1550,47 +1523,77 @@ var Renderer = /*#__PURE__*/function () {
 
               case 10:
                 if ((_step = _iterator.n()).done) {
-                  _context.next = 16;
+                  _context.next = 28;
                   break;
                 }
 
                 part = _step.value;
-                _context.next = 14;
-                return drawParts(ctx, isArray(part) ? part : [part]);
+                parts = isArray(part) ? part : [part];
+                i = 0, len = parts.length;
 
               case 14:
+                if (!(i < len)) {
+                  _context.next = 26;
+                  break;
+                }
+
+                _part = parts[i];
+                _part.renderer = this;
+                ctx.save();
+
+                if (!isUndef(_part.alpha)) {
+                  ctx.globalAlpha = _part.alpha;
+                }
+
+                if (_part.filter) {
+                  // image.style.filter = 'blur(20px)';
+                  ctx.filter = 'blur(20px)';
+                }
+
+                _context.next = 22;
+                return _part.drawCanvas(ctx);
+
+              case 22:
+                ctx.restore();
+
+              case 23:
+                i++;
+                _context.next = 14;
+                break;
+
+              case 26:
                 _context.next = 10;
                 break;
 
-              case 16:
-                _context.next = 21;
+              case 28:
+                _context.next = 33;
                 break;
 
-              case 18:
-                _context.prev = 18;
+              case 30:
+                _context.prev = 30;
                 _context.t0 = _context["catch"](8);
 
                 _iterator.e(_context.t0);
 
-              case 21:
-                _context.prev = 21;
+              case 33:
+                _context.prev = 33;
 
                 _iterator.f();
 
-                return _context.finish(21);
+                return _context.finish(33);
 
-              case 24:
+              case 36:
                 return _context.abrupt("return", canvasElm);
 
-              case 25:
+              case 37:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[8, 18, 21, 24]]);
+        }, _callee, this, [[8, 30, 33, 36]]);
       }));
 
-      function generate(_x3) {
+      function generate(_x) {
         return _generate.apply(this, arguments);
       }
 
@@ -1630,7 +1633,7 @@ var Renderer = /*#__PURE__*/function () {
         }, _callee2, this);
       }));
 
-      function generateSrc(_x4) {
+      function generateSrc(_x2) {
         return _generateSrc.apply(this, arguments);
       }
 
@@ -1671,7 +1674,7 @@ var Renderer = /*#__PURE__*/function () {
         }, _callee3, this);
       }));
 
-      function generateImage(_x5) {
+      function generateImage(_x3) {
         return _generateImage.apply(this, arguments);
       }
 
@@ -1682,4 +1685,4 @@ var Renderer = /*#__PURE__*/function () {
   return Renderer;
 }();
 
-export { BasePart, ImagePart, LinearGradientPart, Point, Rect, RectPart, Renderer, Size, TextPart, drawParts };
+export { BasePart, ImagePart, LinearGradientPart, Point, Rect, RectPart, Renderer, Size, TextPart };

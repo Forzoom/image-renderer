@@ -1,6 +1,6 @@
 import { isUndef, isArray } from './utils';
 import { GenerateOptions } from 'types/index';
-import { BasePart } from './parts/part';
+import { BasePart } from './parts/base';
 import { Part } from 'types';
 export { TextPart } from './parts/text';
 export { ImagePart } from './parts/image';
@@ -12,27 +12,9 @@ export {
     BasePart,
 };
 
-/**
- * 渲染图片
- */
-export async function drawParts(ctx: CanvasRenderingContext2D, parts: Part[]) {
-    for (let i = 0, len = parts.length; i < len; i++) {
-        const part = parts[i];
-        ctx.save();
-        if (!isUndef(part.alpha)) {
-            ctx.globalAlpha = part.alpha;
-        }
-        if (part.filter) {
-            // image.style.filter = 'blur(20px)';
-            ctx.filter = 'blur(20px)';
-        }
-        await part.drawCanvas(ctx);
-        ctx.restore();
-    }
-}
-
 export class Renderer {
     public parts: Array<Part | Part[]> = [];
+    public options: GenerateOptions | null = null;
 
     public draw(part: Part | Part[]) {
         this.parts.push(part);
@@ -51,10 +33,10 @@ export class Renderer {
     }
 
     public async generate(options: Partial<GenerateOptions>): Promise<HTMLCanvasElement | false> {
-        options = this.getOptions(options);
-        const canvasElm = options.createCanvas!();
-        canvasElm.width = options.width!;
-        canvasElm.height = options.height!;
+        this.options = this.getOptions(options);
+        const canvasElm = this.options.createCanvas!();
+        canvasElm.width = this.options.width!;
+        canvasElm.height = this.options.height!;
 
         const ctx = canvasElm.getContext('2d');
 
@@ -62,7 +44,21 @@ export class Renderer {
             return false;
         }
         for (const part of this.parts) {
-            await drawParts(ctx, isArray(part) ? part : [part]);
+            const parts = isArray(part) ? part : [part];
+            for (let i = 0, len = parts.length; i < len; i++) {
+                const part = parts[i];
+                part.renderer = this;
+                ctx.save();
+                if (!isUndef(part.alpha)) {
+                    ctx.globalAlpha = part.alpha;
+                }
+                if (part.filter) {
+                    // image.style.filter = 'blur(20px)';
+                    ctx.filter = 'blur(20px)';
+                }
+                await part.drawCanvas(ctx);
+                ctx.restore();
+            }
         }
         return canvasElm;
     }

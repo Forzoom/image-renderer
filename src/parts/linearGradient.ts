@@ -1,4 +1,4 @@
-import { BasePart } from './part';
+import { BasePart } from './base';
 import { LinearGradientPartOptions } from '../../types';
 import { Point } from '../struct';
 

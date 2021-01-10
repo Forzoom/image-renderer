@@ -6,6 +6,7 @@ import _createClass from '@babel/runtime/helpers/createClass';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import 'core-js/modules/es.regexp.to-string.js';
 import 'core-js/modules/es.object.assign.js';
+import 'core-js/modules/es.array.concat.js';
 import 'core-js/modules/es.regexp.exec.js';
 import 'core-js/modules/es.string.split.js';
 import _assertThisInitialized from '@babel/runtime/helpers/assertThisInitialized';
@@ -100,8 +101,12 @@ var defaultOptions = {
   filter: undefined,
   alpha: 1
 };
-var BasePart = function BasePart(options) {
+var BasePart =
+/** 渲染器，在渲染前将配置 */
+function BasePart(options) {
   _classCallCheck(this, BasePart);
+
+  _defineProperty(this, "renderer", null);
 
   _defineProperty(this, "key", void 0);
 
@@ -216,6 +221,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 var defaultOptions$1 = {
   origin: new Point(0, 0),
   fontSize: 14,
+  font: 'sans-serif',
   singleLine: false,
   color: '000000',
   textAlign: 'left',
@@ -228,7 +234,11 @@ var TextPart = /*#__PURE__*/function (_BasePart) {
 
   /** 将自动折行 */
 
+  /** 字体大小 */
+
   /** 需要手动指定行高 */
+
+  /** 使用字体 */
 
   /** 为vertical时将主动value.split('') */
   function TextPart(options) {
@@ -291,8 +301,9 @@ var TextPart = /*#__PURE__*/function (_BasePart) {
 
       ctx.fillStyle = '#' + this.color;
 
-      if (this.font) {
-        ctx.font = this.font;
+      if (this.fontSize && this.font) {
+        // tip: 根据文档，ctx.font要求fontFamily和fontSize一起设置，并且一定要有两者
+        ctx.font = "".concat(this.fontSize, "px ").concat(this.font);
       }
 
       ctx.textAlign = this.textAlign; // 对于宽度有限制要求
@@ -377,6 +388,14 @@ var ImagePart = /*#__PURE__*/function (_BasePart) {
     value: async function drawCanvas(ctx) {
       if (isUndef(this.value)) {
         return;
+      }
+
+      if (!this.renderer) {
+        throw new Error('Cannot find renderer.');
+      }
+
+      if (!this.renderer.options) {
+        throw new Error('Cannot find renderer.options, use renderer.generate function first.');
       }
 
       var elm = null;
@@ -547,33 +566,13 @@ function _createForOfIteratorHelper$1(o, allowArrayLike) { var it; if (typeof Sy
 function _unsupportedIterableToArray$1(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray$1(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray$1(o, minLen); }
 
 function _arrayLikeToArray$1(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-/**
- * 渲染图片
- */
-
-async function drawParts(ctx, parts) {
-  for (var i = 0, len = parts.length; i < len; i++) {
-    var part = parts[i];
-    ctx.save();
-
-    if (!isUndef(part.alpha)) {
-      ctx.globalAlpha = part.alpha;
-    }
-
-    if (part.filter) {
-      // image.style.filter = 'blur(20px)';
-      ctx.filter = 'blur(20px)';
-    }
-
-    await part.drawCanvas(ctx);
-    ctx.restore();
-  }
-}
 var Renderer = /*#__PURE__*/function () {
   function Renderer() {
     _classCallCheck(this, Renderer);
 
     _defineProperty(this, "parts", []);
+
+    _defineProperty(this, "options", null);
   }
 
   _createClass(Renderer, [{
@@ -599,10 +598,10 @@ var Renderer = /*#__PURE__*/function () {
   }, {
     key: "generate",
     value: async function generate(options) {
-      options = this.getOptions(options);
-      var canvasElm = options.createCanvas();
-      canvasElm.width = options.width;
-      canvasElm.height = options.height;
+      this.options = this.getOptions(options);
+      var canvasElm = this.options.createCanvas();
+      canvasElm.width = this.options.width;
+      canvasElm.height = this.options.height;
       var ctx = canvasElm.getContext('2d');
 
       if (!ctx) {
@@ -615,7 +614,25 @@ var Renderer = /*#__PURE__*/function () {
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var part = _step.value;
-          await drawParts(ctx, isArray(part) ? part : [part]);
+          var parts = isArray(part) ? part : [part];
+
+          for (var i = 0, len = parts.length; i < len; i++) {
+            var _part = parts[i];
+            _part.renderer = this;
+            ctx.save();
+
+            if (!isUndef(_part.alpha)) {
+              ctx.globalAlpha = _part.alpha;
+            }
+
+            if (_part.filter) {
+              // image.style.filter = 'blur(20px)';
+              ctx.filter = 'blur(20px)';
+            }
+
+            await _part.drawCanvas(ctx);
+            ctx.restore();
+          }
         }
       } catch (err) {
         _iterator.e(err);
@@ -655,4 +672,4 @@ var Renderer = /*#__PURE__*/function () {
   return Renderer;
 }();
 
-export { BasePart, ImagePart, LinearGradientPart, Point, Rect, RectPart, Renderer, Size, TextPart, drawParts };
+export { BasePart, ImagePart, LinearGradientPart, Point, Rect, RectPart, Renderer, Size, TextPart };

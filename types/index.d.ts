@@ -35,6 +35,9 @@ export interface BasePartOption {
     filter?: boolean;
 }
 export class BasePart implements BasePartOption {
+    /** 渲染器，在渲染前将配置 */
+    renderer: Renderer | null;
+    key?: string;
     type: string;
     alpha?: number;
     filter?: boolean;
@@ -44,8 +47,8 @@ export class BasePart implements BasePartOption {
 export type Part = ImagePart | TextPart;
 
 export class Renderer {
-    new (): Renderer;
     parts: Array<Part | Part[]>;
+    options: GenerateOptions | null;
     draw(part: Part | Part[]): void;
     reset(): void;
     getOptions(options: Partial<GenerateOptions>): GenerateOptions;
@@ -62,11 +65,13 @@ export interface TextPartOptions extends BasePartOption {
     origin: Point;
     /** 将自动折行 */
     width?: number;
+    /** 字号大小 */
     fontSize?: number;
     /** 需要手动指定行高 */
     lineHeight?: number;
     singleLine?: boolean;
     color?: string;
+    /** 使用字体 */
     font?: string;
     textAlign?: 'left' | 'center' | 'right';
     orientation?: 'horizontal' | 'vertical';

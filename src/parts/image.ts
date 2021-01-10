@@ -1,4 +1,4 @@
-import { BasePart } from './part';
+import { BasePart } from './base';
 import { ImagePartOptions } from '../../types';
 import { isString, isUndef, loadImage } from '../utils';
 import { Point, Size, Rect } from '../struct';
@@ -32,6 +32,12 @@ export class ImagePart extends BasePart implements ImagePartOptions {
     public async drawCanvas(ctx: CanvasRenderingContext2D) {
         if (isUndef(this.value)) {
             return;
+        }
+        if (!this.renderer) {
+            throw new Error('Cannot find renderer.');
+        }
+        if (!this.renderer.options) {
+            throw new Error('Cannot find renderer.options, use renderer.generate function first.');
         }
         let elm: HTMLImageElement | HTMLCanvasElement | null = null;
         if (isString(this.value)) {

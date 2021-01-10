@@ -1,4 +1,4 @@
-import { BasePartOption } from "../../types";
+import { BasePartOption, Renderer } from "../../types";
 
 export const defaultOptions: BasePartOption = {
     filter: undefined,
@@ -6,6 +6,8 @@ export const defaultOptions: BasePartOption = {
 } as const;
 
 export abstract class BasePart {
+    /** 渲染器，在渲染前将配置 */
+    public renderer: Renderer | null = null;
     public key?: string;
     public alpha?: number;
     public filter?: boolean;

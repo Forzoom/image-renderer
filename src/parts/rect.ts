@@ -1,4 +1,4 @@
-import { BasePart } from './part';
+import { BasePart } from './base';
 import { RectPartOptions } from '../../types';
 import { Point, Size } from '../struct';
 

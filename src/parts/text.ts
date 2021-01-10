@@ -1,4 +1,4 @@
-import { BasePart } from './part';
+import { BasePart } from './base';
 import { TextPartOptions } from '../../types';
 import { isString, isUndef, binarySearch } from '../utils';
 import { Point } from '../struct';
@@ -6,6 +6,7 @@ import { Point } from '../struct';
 export const defaultOptions: TextPartOptions = {
     origin: new Point(0, 0),
     fontSize: 14,
+    font: 'sans-serif',
     singleLine: false,
     color: '000000',
     textAlign: 'left',
@@ -18,11 +19,13 @@ export class TextPart extends BasePart implements TextPartOptions {
     public origin: Point;
     /** 将自动折行 */
     public width: number;
+    /** 字体大小 */
     public fontSize: number;
     /** 需要手动指定行高 */
     public lineHeight: number;
     public singleLine?: boolean;
     public color?: string;
+    /** 使用字体 */
     public font?: string;
     public textAlign: 'left' | 'center' | 'right';
     /** 为vertical时将主动value.split('') */
@@ -53,8 +56,9 @@ export class TextPart extends BasePart implements TextPartOptions {
             return;
         }
         ctx.fillStyle = '#' + this.color;
-        if (this.font) {
-            ctx.font = this.font;
+        if (this.fontSize && this.font) {
+            // tip: 根据文档，ctx.font要求fontFamily和fontSize一起设置，并且一定要有两者
+            ctx.font = `${this.fontSize}px ${this.font}`;
         }
         ctx.textAlign = this.textAlign;
 
