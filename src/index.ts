@@ -1,4 +1,4 @@
-import { isUndef, isArray } from './utils';
+import { isUndef, isArray, noop } from './utils';
 import { GenerateOptions } from 'types/index';
 import { BasePart } from './parts/base';
 import { Part } from 'types';
@@ -29,6 +29,8 @@ export class Renderer {
             createImage: options && options.createImage ? options.createImage : document.createElement.bind(document, 'img') as () => HTMLImageElement,
             width: options && options.width ? options.width : 300,
             height: options && options.height ? options.height : 300,
+            beforeDraw: options.beforeDraw ? options.beforeDraw : noop,
+            afterDraw: options.afterDraw ? options.afterDraw : noop,
         };
     }
 
@@ -49,14 +51,9 @@ export class Renderer {
                 const part = parts[i];
                 part.renderer = this;
                 ctx.save();
-                if (!isUndef(part.alpha)) {
-                    ctx.globalAlpha = part.alpha;
-                }
-                if (part.filter) {
-                    // image.style.filter = 'blur(20px)';
-                    ctx.filter = 'blur(20px)';
-                }
+                this.options.beforeDraw(ctx, part);
                 await part.drawCanvas(ctx);
+                this.options.afterDraw(ctx, part);
                 ctx.restore();
             }
         }

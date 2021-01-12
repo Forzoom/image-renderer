@@ -1,3 +1,4 @@
+import { isUndef } from "@/utils";
 import { BasePartOption, Renderer } from "../../types";
 
 export const defaultOptions: BasePartOption = {
@@ -19,5 +20,13 @@ export abstract class BasePart {
         this.key = opt.key;
     }
 
-    public abstract drawCanvas(ctx: CanvasRenderingContext2D): Promise<void> | void;
+    public drawCanvas(ctx: CanvasRenderingContext2D): Promise<void> | void {
+        if (!isUndef(this.alpha)) {
+            ctx.globalAlpha = this.alpha;
+        }
+        if (this.filter) {
+            // image.style.filter = 'blur(20px)';
+            ctx.filter = 'blur(20px)';
+        }
+    };
 }

@@ -3,7 +3,6 @@ const commonjs = require('@rollup/plugin-commonjs');
 const { nodeResolve } = require('@rollup/plugin-node-resolve');
 const babel = require('@rollup/plugin-babel').default;
 const alias = require('@rollup/plugin-alias');
-const { uglify } = require('rollup-plugin-uglify');
 
 const path = require('path');
 
@@ -82,19 +81,6 @@ module.exports = exports = [
                 babelHelpers: 'runtime',
                 // exclude: 'node_modules/**',
                 extensions,
-            }),
-            uglify({
-                sourcemap: false,
-                output: {
-                    // 保留必要的注释内容
-                    comments: function(node, comment) {
-                        if (comment.type === "comment2") {
-                            // multiline comment
-                            return /@preserve|@license|@cc_on/i.test(comment.value);
-                        }
-                        return false;
-                    },
-                },
             }),
         ],
     },

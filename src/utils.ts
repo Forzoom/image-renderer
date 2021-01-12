@@ -1,3 +1,5 @@
+export const noop = (() => {});
+
 /**
  * 是否是null或者undefined
  *

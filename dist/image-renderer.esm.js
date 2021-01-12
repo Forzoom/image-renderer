@@ -1,4 +1,3 @@
-import 'core-js/modules/es.array.filter.js';
 import _regeneratorRuntime from '@babel/runtime/regenerator';
 import 'core-js/modules/es.symbol.js';
 import 'core-js/modules/es.symbol.description.js';
@@ -24,6 +23,7 @@ import _asyncToGenerator from '@babel/runtime/helpers/asyncToGenerator';
 import _classCallCheck from '@babel/runtime/helpers/classCallCheck';
 import _createClass from '@babel/runtime/helpers/createClass';
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
+import 'core-js/modules/es.array.filter.js';
 import 'core-js/modules/es.object.assign.js';
 import 'core-js/modules/es.array.concat.js';
 import 'core-js/modules/es.regexp.exec.js';
@@ -756,6 +756,7 @@ var runtime_1 = createCommonjsModule(function (module) {
   }
 });
 
+var noop = function noop() {};
 /**
  * 是否是null或者undefined
  *
@@ -763,6 +764,7 @@ var runtime_1 = createCommonjsModule(function (module) {
  *
  * @return {boolean}
  */
+
 function isUndef(v) {
   return v === null || v === undefined;
 }
@@ -874,24 +876,41 @@ var defaultOptions = {
   filter: undefined,
   alpha: 1
 };
-var BasePart =
-/** 渲染器，在渲染前将配置 */
-function BasePart(options) {
-  _classCallCheck(this, BasePart);
+var BasePart = /*#__PURE__*/function () {
+  /** 渲染器，在渲染前将配置 */
+  function BasePart(options) {
+    _classCallCheck(this, BasePart);
 
-  _defineProperty(this, "renderer", null);
+    _defineProperty(this, "renderer", null);
 
-  _defineProperty(this, "key", void 0);
+    _defineProperty(this, "key", void 0);
 
-  _defineProperty(this, "alpha", void 0);
+    _defineProperty(this, "alpha", void 0);
 
-  _defineProperty(this, "filter", void 0);
+    _defineProperty(this, "filter", void 0);
 
-  var opt = Object.assign({}, defaultOptions, options);
-  this.alpha = opt.alpha;
-  this.filter = opt.filter;
-  this.key = opt.key;
-};
+    var opt = Object.assign({}, defaultOptions, options);
+    this.alpha = opt.alpha;
+    this.filter = opt.filter;
+    this.key = opt.key;
+  }
+
+  _createClass(BasePart, [{
+    key: "drawCanvas",
+    value: function drawCanvas(ctx) {
+      if (!isUndef(this.alpha)) {
+        ctx.globalAlpha = this.alpha;
+      }
+
+      if (this.filter) {
+        // image.style.filter = 'blur(20px)';
+        ctx.filter = 'blur(20px)';
+      }
+    }
+  }]);
+
+  return BasePart;
+}();
 
 var Size = /*#__PURE__*/function () {
   function Size(width) {
@@ -1489,7 +1508,9 @@ var Renderer = /*#__PURE__*/function () {
         createCanvas: options && options.createCanvas ? options.createCanvas : document.createElement.bind(document, 'canvas'),
         createImage: options && options.createImage ? options.createImage : document.createElement.bind(document, 'img'),
         width: options && options.width ? options.width : 300,
-        height: options && options.height ? options.height : 300
+        height: options && options.height ? options.height : 300,
+        beforeDraw: options.beforeDraw ? options.beforeDraw : noop,
+        afterDraw: options.afterDraw ? options.afterDraw : noop
       };
     }
   }, {
@@ -1540,20 +1561,12 @@ var Renderer = /*#__PURE__*/function () {
                 _part = parts[i];
                 _part.renderer = this;
                 ctx.save();
-
-                if (!isUndef(_part.alpha)) {
-                  ctx.globalAlpha = _part.alpha;
-                }
-
-                if (_part.filter) {
-                  // image.style.filter = 'blur(20px)';
-                  ctx.filter = 'blur(20px)';
-                }
-
-                _context.next = 22;
+                this.options.beforeDraw(ctx, _part);
+                _context.next = 21;
                 return _part.drawCanvas(ctx);
 
-              case 22:
+              case 21:
+                this.options.afterDraw(ctx, _part);
                 ctx.restore();
 
               case 23:

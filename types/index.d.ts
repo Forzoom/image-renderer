@@ -144,4 +144,6 @@ export interface GenerateOptions {
     createImage: ImageCreator;
     width: number;
     height: number;
+    beforeDraw: (ctx: CanvasRenderingContext2D, part: BasePart) => void;
+    afterDraw: (ctx: CanvasRenderingContext2D, part: BasePart) => void;
 }

@@ -9,3 +9,7 @@
 
 1. TextPart统一font和fontSize设置
 1. 不再导出drawParts函数
+
+#### 0.0.4
+
+1. 添加beforeDraw和afterDraw钩子

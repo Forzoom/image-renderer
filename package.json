@@ -1,6 +1,6 @@
 {
   "name": "@forzoom/image-renderer",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/image-renderer.cjs.js",
   "module": "dist/image-renderer.esm.js",
   "license": "MIT",
